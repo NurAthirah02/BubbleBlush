@@ -10,6 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as Font from 'expo-font';
 import wishlistService from '../lib/services/wishlist';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 
 const Wishlist = ({ navigation }) => {
   const [fontLoaded, setFontLoaded] = useState(false);
@@ -46,28 +47,36 @@ const Wishlist = ({ navigation }) => {
     navigation.navigate('Home', { screen: 'ProductDetail', params: { product } });
   };
 
-  const renderItem = ({ item }) => (
+  const renderRightActions = (itemId) => (
     <TouchableOpacity
-      style={styles.itemContainer}
-      onPress={() => navigateToProductDetail(item.product)}
+      style={styles.deleteButton}
+      onPress={() => removeFromWishlist(itemId)}
     >
-      <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: item.product.imageUrl || 'https://via.placeholder.com/60' }}
-          style={styles.itemImage}
-        />
-      </View>
-      <View style={styles.itemDetails}>
-        <Text style={styles.itemName}>{item.product.name}</Text>
-        <Text style={styles.itemPrice}>RM {item.product.price.toFixed(2)}</Text>
-      </View>
-      <TouchableOpacity
-        style={styles.removeButton}
-        onPress={() => removeFromWishlist(item.id)}
-      >
-        <Ionicons name="trash-outline" size={24} color="#AD1457" />
-      </TouchableOpacity>
+      <Ionicons name="trash-outline" size={24} color="#fff" />
     </TouchableOpacity>
+  );
+
+  const renderItem = ({ item }) => (
+    <Swipeable
+      renderRightActions={() => renderRightActions(item.id)}
+      overshootRight={false}
+    >
+      <TouchableOpacity
+        style={styles.itemContainer}
+        onPress={() => navigateToProductDetail(item.product)}
+      >
+        <View style={styles.imageContainer}>
+          <Image
+            source={{ uri: item.product.imageUrl || 'https://via.placeholder.com/60' }}
+            style={styles.itemImage}
+          />
+        </View>
+        <View style={styles.itemDetails}>
+          <Text style={styles.itemName}>{item.product.name}</Text>
+          <Text style={styles.itemPrice}>RM {item.product.price.toFixed(2)}</Text>
+        </View>
+      </TouchableOpacity>
+    </Swipeable>
   );
 
   if (!fontLoaded || loading) {
@@ -141,8 +150,16 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontFamily: 'MyFont-Regular',
   },
-  removeButton: {
-    padding: 10,
+  deleteButton: {
+    backgroundColor: '#AD1457',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+    height: 'auto',
+    borderRadius: 10,
+    marginBottom: 15,
+    paddingVertical: 15,
+    marginLeft: 5,
   },
   emptyContainer: {
     flex: 1,

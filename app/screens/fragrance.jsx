@@ -12,14 +12,14 @@ import {
 } from 'react-native';
 import Carousel from 'react-native-reanimated-carousel';
 import { Ionicons } from '@expo/vector-icons';
-import { Video } from 'expo-av';
+import { Video } from 'expo-av'; 
 import { fetchProductByTypeCategory, fetchProductByCategory } from '../lib/services/productService';
-import wishlistService from '../lib/services/wishlist'; // Import wishlist service
-import authService from '../lib/services/auth'; // Import auth service
+import wishlistService from '../lib/services/wishlist';
+import authService from '../lib/services/auth';
 import { useFonts } from 'expo-font';
 import { Alert } from 'react-native';
 
-const { width } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const Fragrance = ({ navigation }) => {
   const [hotSaleProducts, setHotSaleProducts] = useState([]);
@@ -29,23 +29,23 @@ const Fragrance = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [videoError, setVideoError] = useState(null);
-  const [wishlistStatus, setWishlistStatus] = useState({}); // Track wishlist status for each product
+  const [wishlistStatus, setWishlistStatus] = useState({});
 
-  // Animation setup
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
 
-  // Load custom font
   const [fontsLoaded] = useFonts({
     'MyFont-Regular': require('../assets/font/PTSerif-Regular.ttf'),
   });
 
-  // Mock data for special offers
   const specialOffers = [
     { id: 1, image: require('../assets/fragrance/a.jpg') },
     { id: 2, image: require('../assets/fragrance/b.jpg') },
     { id: 3, image: require('../assets/fragrance/c.jpg') },
   ];
+
+  const VIDEO_WIDTH = SCREEN_WIDTH - 40;
+  const VIDEO_HEIGHT = VIDEO_WIDTH * (9 / 16); // 16:9 aspect ratio
 
   const fetchHotSaleFragranceProducts = async () => {
     setIsHotSaleLoading(true);
@@ -138,7 +138,7 @@ const Fragrance = ({ navigation }) => {
     }
   };
 
-  const itemWidth = width * 0.6;
+  const itemWidth = SCREEN_WIDTH * 0.6;
 
   if (!fontsLoaded) {
     return null;
@@ -174,7 +174,7 @@ const Fragrance = ({ navigation }) => {
             ) : (
               <Video
                 source={require('../assets/fragrance/fragrance.mp4')}
-                style={styles.video}
+                style={[styles.video, { width: VIDEO_WIDTH, height: VIDEO_HEIGHT }]}
                 resizeMode="cover"
                 shouldPlay
                 isLooping
@@ -235,7 +235,7 @@ const Fragrance = ({ navigation }) => {
               mode="parallax"
               modeConfig={{
                 parallaxScrollingScale: 1.0,
-                parallaxScrollingOffset: width * 0.2,
+                parallaxScrollingOffset: SCREEN_WIDTH * 0.2,
                 parallaxAdjacentItemScale: 0.8,
                 parallaxAdjacentItemOpacity: 0.5,
               }}
@@ -288,7 +288,7 @@ const Fragrance = ({ navigation }) => {
             <View style={styles.carouselContainer}>
               <Carousel
                 loop
-                width={width - 40}
+                width={SCREEN_WIDTH - 40}
                 height={200}
                 autoPlay
                 data={specialOffers}
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     fontFamily: 'MyFont-Regular',
   },
   carousel: {
-    width: width,
+    width: SCREEN_WIDTH,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   carouselItem: {
-    width: width * 0.6,
+    width: SCREEN_WIDTH * 0.6,
     height: 280,
     backgroundColor: '#f8d7d6',
     borderRadius: 12,
@@ -418,8 +418,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   productItem: {
-    width: (width - 60) / 2,
-    height: (width - 60) / 1.5,
+    width: (SCREEN_WIDTH - 60) / 2,
+    height: (SCREEN_WIDTH - 60) / 1.5,
     borderWidth: 2,
     borderColor: '#f8d7d6',
     borderRadius: 12,
@@ -483,8 +483,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   video: {
-    width: width - 40,
-    height: 200,
+    // Base styles (width and height set dynamically inline)
   },
   carouselContainer: {
     width: '100%',

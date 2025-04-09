@@ -1,7 +1,9 @@
-import React from 'react';
+// HomeStack.js
+import React, { useContext, useEffect } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Platform, TouchableOpacity, StyleSheet } from 'react-native';
+import { Platform, TouchableOpacity, StyleSheet, View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { CartContext } from '../lib/services/cartContext';
 import HomeScreen from '../(tabs)/home';
 import ProductDetail from '../screens/productDetail';
 import Skincare from '../screens/skincare';
@@ -15,6 +17,18 @@ import Checkout from '../screens/checkout';
 const Stack = createStackNavigator();
 
 const HomeStack = () => {
+  const { cartItems } = useContext(CartContext);
+
+  // Debug cartItems changes
+  useEffect(() => {
+    console.log('HomeStack cartItems updated:', cartItems);
+  }, [cartItems]);
+
+  // Calculate total quantity of items
+  const totalItems = Array.isArray(cartItems) ? cartItems.length : 0;
+
+  console.log('HomeStack rendering, totalItems:', totalItems);
+
   return (
     <Stack.Navigator
       screenOptions={({ navigation }) => ({
@@ -41,7 +55,14 @@ const HomeStack = () => {
             style={styles.headerRight}
             onPress={() => navigation.navigate('Cart')}
           >
-            <Ionicons name="cart-outline" size={28} color="#333" />
+            <View style={styles.cartContainer}>
+              <Ionicons name="cart-outline" size={28} color="#333" />
+              {totalItems > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{totalItems}</Text>
+                </View>
+              )}
+            </View>
           </TouchableOpacity>
         ),
       })}
@@ -66,6 +87,25 @@ const HomeStack = () => {
 const styles = StyleSheet.create({
   headerRight: {
     paddingRight: 15,
+  },
+  cartContainer: {
+    position: 'relative',
+  },
+  badge: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: '#AD1457',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });
 

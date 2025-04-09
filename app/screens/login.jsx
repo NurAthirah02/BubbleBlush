@@ -1,6 +1,6 @@
 //app/screens/login.jsx
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Dimensions } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Dimensions, KeyboardAvoidingView, Platform } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useFonts } from 'expo-font';
 import authService from '../lib/services/auth';
@@ -31,65 +31,75 @@ const LoginScreen = ({ navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
-      {/* Logo and Title */}
-      <View style={[styles.header, error ? styles.headerWithError : null]}>
-        <Image 
-          source={require('../assets/login.png')} 
-          style={styles.logo} 
-          resizeMode="contain"
-        />
-      </View>
-
-      {/* Pink container fixed at the bottom */}
-      <View style={styles.pinkContainer} />
-
-      {/* White form container */}
-      <View style={styles.formContainer}>
-        <View style={styles.inputContainer}>
-          <Ionicons name="mail-outline" size={20} color="#AD1457" style={styles.icon} />
-          <TextInput 
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    >
+      <View style={styles.innerContainer}>
+        {/* Logo and Title */}
+        <View style={[styles.header, error ? styles.headerWithError : null]}>
+          <Image 
+            source={require('../assets/login.png')} 
+            style={styles.logo} 
+            resizeMode="contain"
           />
         </View>
 
-        <View style={styles.inputContainer}>
-          <Ionicons name="lock-closed-outline" size={20} color="#AD1457" style={styles.icon} />
-          <TextInput 
-            style={styles.input}
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
+        {/* Pink container fixed at the bottom */}
+        <View style={styles.pinkContainer} />
+
+        {/* White form container */}
+        <View style={styles.formContainer}>
+          <View style={styles.inputContainer}>
+            <Ionicons name="mail-outline" size={20} color="#AD1457" style={styles.icon} />
+            <TextInput 
+              style={styles.input}
+              placeholder="Email"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Ionicons name="lock-closed-outline" size={20} color="#AD1457" style={styles.icon} />
+            <TextInput 
+              style={styles.input}
+              placeholder="Password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+          </View>
+
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+            <Text style={styles.buttonText}>Login</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+            <Text style={styles.signupText}>
+              Are you new here, pretty? <Text style={styles.signupLink}>Sign up</Text>
+            </Text>
+          </TouchableOpacity>
         </View>
-
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
-          <Text style={styles.signupText}>
-            Are you new here, pretty? <Text style={styles.signupLink}>Sign up</Text>
-          </Text>
-        </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     backgroundColor: '#f8d7d6',
+  },
+  innerContainer: {
+    flex: 1,
+    alignItems: 'center',
+    width: '100%',
   },
   header: {
     position: 'absolute',
@@ -106,12 +116,6 @@ const styles = StyleSheet.create({
     width: width * 0.95,
     height: height * 0.5,
     marginBottom: 10,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#AD1457',
-    fontFamily: 'MyFont-Regular',
   },
   pinkContainer: {
     width: '100%',

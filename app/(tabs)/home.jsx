@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
   View,
   ScrollView,
@@ -6,6 +6,7 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  TouchableNativeFeedback,
   Dimensions,
   StatusBar,
   ActivityIndicator,
@@ -19,11 +20,22 @@ import { fetchProductByType } from '../lib/services/productService';
 import { searchProducts } from '../lib/services/search';
 import { Ionicons } from '@expo/vector-icons';
 import authService from '../lib/services/auth';
+import { CartContext } from '../lib/services/cartContext'; // Import CartContext
 
 const { width } = Dimensions.get('window');
+const circleSize = Math.max(Math.min(width * 0.3, 200), 120);
+const imageSize = circleSize * 0.75;
+const bannerHeight = (width * 9) / 16;
+
+const bannerImages = [
+  require('../assets/home/1.jpg'),
+  require('../assets/home/2.jpg'),
+  require('../assets/home/3.jpg'),
+  require('../assets/home/4.jpg'),
+];
 
 const HomeScreen = ({ navigation }) => {
-  const bannerHeight = (width * 9) / 16;
+  const { cartItems } = useContext(CartContext); // Access cartItems from CartContext
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [fontLoaded, setFontLoaded] = useState(false);
@@ -31,6 +43,9 @@ const HomeScreen = ({ navigation }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [user, setUser] = useState(null);
+
+  // Calculate total cart items
+  const totalItems = Array.isArray(cartItems) ? cartItems.length : 0;
 
   useEffect(() => {
     async function loadResources() {
@@ -80,9 +95,9 @@ const HomeScreen = ({ navigation }) => {
   }, [searchQuery]);
 
   const specialOffers = [
-    { id: 1, image: require('../assets/makeup/a.jpg') },
-    { id: 2, image: require('../assets/haircare/b.jpg') },
-    { id: 3, image: require('../assets/bodycare/c.jpg') },
+    { id: '1', image: require('../assets/makeup/a.jpg') },
+    { id: '2', image: require('../assets/haircare/b.jpg') },
+    { id: '3', image: require('../assets/bodycare/c.jpg') },
   ];
 
   if (!fontLoaded) {
@@ -102,67 +117,90 @@ const HomeScreen = ({ navigation }) => {
     </TouchableOpacity>
   );
 
+  const CategoryTouchable = Platform.OS === 'android' ? TouchableNativeFeedback : TouchableOpacity;
+
   const RegularContent = () => (
     <ScrollView contentContainerStyle={styles.scrollContent}>
-      <View style={[styles.bannerContainer, { height: bannerHeight }]}>
-        <Image
-          source={require('../assets/banner_hs.jpg')}
-          style={styles.bannerImage}
-          resizeMode="cover"
+      <View style={styles.bannerContainer}>
+        <Carousel
+          loop
+          width={width}
+          height={bannerHeight}
+          autoPlay
+          data={bannerImages}
+          scrollAnimationDuration={1000}
+          renderItem={({ item }) => (
+            <Image source={item} style={styles.bannerImage} resizeMode="cover" />
+          )}
         />
       </View>
 
       <Text style={styles.sectionTitle}>Shop by Category</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScrollContainer}>
-        <TouchableOpacity
-          style={styles.categoryItem}
+        <CategoryTouchable
           onPress={() => navigation.navigate('Skincare')}
+          background={Platform.OS === 'android' ? TouchableNativeFeedback.Ripple('#ccc', false) : undefined}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
         >
-          <View style={styles.circleBackground}>
-            <Image source={require('../assets/skincare.png')} style={styles.categoryImage} />
+          <View style={styles.categoryItem}>
+            <View style={styles.circleBackground}>
+              <Image source={require('../assets/skincare.png')} style={styles.categoryImage} />
+            </View>
+            <Text style={styles.categoryText}>Skincare</Text>
           </View>
-          <Text style={styles.categoryText}>Skincare</Text>
-        </TouchableOpacity>
+        </CategoryTouchable>
 
-        <TouchableOpacity
-          style={styles.categoryItem}
+        <CategoryTouchable
           onPress={() => navigation.navigate('Makeup')}
+          background={Platform.OS === 'android' ? TouchableNativeFeedback.Ripple('#ccc', false) : undefined}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
         >
-          <View style={styles.circleBackground}>
-            <Image source={require('../assets/makeup.png')} style={styles.categoryImage} />
+          <View style={styles.categoryItem}>
+            <View style={styles.circleBackground}>
+              <Image source={require('../assets/makeup.png')} style={styles.categoryImage} />
+            </View>
+            <Text style={styles.categoryText}>Makeup</Text>
           </View>
-          <Text style={styles.categoryText}>Makeup</Text>
-        </TouchableOpacity>
+        </CategoryTouchable>
 
-        <TouchableOpacity
-          style={styles.categoryItem}
+        <CategoryTouchable
           onPress={() => navigation.navigate('Haircare')}
+          background={Platform.OS === 'android' ? TouchableNativeFeedback.Ripple('#ccc', false) : undefined}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
         >
-          <View style={styles.circleBackground}>
-            <Image source={require('../assets/haircare.png')} style={styles.categoryImage} />
+          <View style={styles.categoryItem}>
+            <View style={styles.circleBackground}>
+              <Image source={require('../assets/haircare.png')} style={styles.categoryImage} />
+            </View>
+            <Text style={styles.categoryText}>Haircare</Text>
           </View>
-          <Text style={styles.categoryText}>Haircare</Text>
-        </TouchableOpacity>
+        </CategoryTouchable>
 
-        <TouchableOpacity
-          style={styles.categoryItem}
+        <CategoryTouchable
           onPress={() => navigation.navigate('Bodycare')}
+          background={Platform.OS === 'android' ? TouchableNativeFeedback.Ripple('#ccc', false) : undefined}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
         >
-          <View style={styles.circleBackground}>
-            <Image source={require('../assets/bodyCare.png')} style={styles.categoryImage} />
+          <View style={styles.categoryItem}>
+            <View style={styles.circleBackground}>
+              <Image source={require('../assets/bodyCare.png')} style={styles.categoryImage} />
+            </View>
+            <Text style={styles.categoryText}>Body Care</Text>
           </View>
-          <Text style={styles.categoryText}>Body Care</Text>
-        </TouchableOpacity>
+        </CategoryTouchable>
 
-        <TouchableOpacity
-          style={styles.categoryItem}
+        <CategoryTouchable
           onPress={() => navigation.navigate('Fragrance')}
+          background={Platform.OS === 'android' ? TouchableNativeFeedback.Ripple('#ccc', false) : undefined}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
         >
-          <View style={styles.circleBackground}>
-            <Image source={require('../assets/fragrance.png')} style={styles.categoryImage} />
+          <View style={styles.categoryItem}>
+            <View style={styles.circleBackground}>
+              <Image source={require('../assets/fragrance.png')} style={styles.categoryImage} />
+            </View>
+            <Text style={styles.categoryText}>Fragrance</Text>
           </View>
-          <Text style={styles.categoryText}>Fragrance</Text>
-        </TouchableOpacity>
+        </CategoryTouchable>
       </ScrollView>
 
       <Text style={styles.sectionTitle}>Featured Products</Text>
@@ -178,7 +216,7 @@ const HomeScreen = ({ navigation }) => {
             >
               <Image source={{ uri: product.imageUrl }} style={styles.featuredImage} />
               <Text style={styles.featuredName}>{product.name}</Text>
-              <Text style={styles.featuredPrice}>RM{product.price}</Text>
+              <Text style={styles.searchPrice}>RM{product.price}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -229,18 +267,31 @@ const HomeScreen = ({ navigation }) => {
             }
           }}
         >
-          <Ionicons name="cart-outline" size={30} color="#333" />
+          <View style={styles.cartContainer}>
+            <Ionicons name="cart-outline" size={30} color="#333" />
+            {totalItems > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{totalItems}</Text>
+              </View>
+            )}
+          </View>
         </TouchableOpacity>
       </View>
 
       {isSearching && searchQuery.trim() ? (
-        <FlatList
-          data={searchResults}
-          renderItem={renderSearchItem}
-          keyExtractor={item => item.id}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.searchResultsContent}
-        />
+        searchResults.length > 0 ? (
+          <FlatList
+            data={searchResults}
+            renderItem={renderSearchItem}
+            keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.searchResultsContent}
+          />
+        ) : (
+          <View style={styles.noResultsContainer}>
+            <Text style={styles.noResultsText}>No search results found</Text>
+          </View>
+        )
       ) : (
         <RegularContent />
       )}
@@ -290,6 +341,25 @@ const styles = StyleSheet.create({
   cartButton: {
     padding: 5,
   },
+  cartContainer: {
+    position: 'relative',
+  },
+  badge: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: '#AD1457',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
   scrollContent: {
     paddingTop: Platform.OS === 'ios' ? 0 : 10,
     paddingBottom: 100,
@@ -334,10 +404,12 @@ const styles = StyleSheet.create({
   },
   bannerContainer: {
     width: '100%',
+    height: bannerHeight,
+    overflow: 'hidden',
   },
   bannerImage: {
     width: '100%',
-    height: '100%',
+    height: bannerHeight,
     borderBottomLeftRadius: 40,
   },
   sectionTitle: {
@@ -359,10 +431,10 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   circleBackground: {
-    width: 120,
-    height: 120,
+    width: circleSize,
+    height: circleSize,
     backgroundColor: '#fff',
-    borderRadius: 60,
+    borderRadius: circleSize / 2,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -372,9 +444,9 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   categoryImage: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+    width: imageSize,
+    height: imageSize,
+    borderRadius: imageSize / 2,
   },
   categoryText: {
     marginTop: 8,
@@ -441,6 +513,17 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     paddingVertical: 10,
+    fontFamily: 'MyFont-Regular',
+  },
+  noResultsContainer: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 20,
+  },
+  noResultsText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
     fontFamily: 'MyFont-Regular',
   },
 });

@@ -24,13 +24,22 @@ const PurchaseHistory = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
-  const [selectedReceiptId, setSelectedReceiptId] = useState(null); // New state
+  const [selectedReceiptId, setSelectedReceiptId] = useState(null);
   const [reviewText, setReviewText] = useState('');
-  const [reviewedPurchases, setReviewedPurchases] = useState(new Set()); // Renamed and updated
+  const [reviewedPurchases, setReviewedPurchases] = useState(new Set());
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const cachedRecords = await purchaseHistoryService.getCachedPurchaseHistory();
+        if (cachedRecords) {
+          setReceipts(cachedRecords);
+          setLoading(false);
+        } else {
+          setLoading(true);
+        }
+
         const records = await purchaseHistoryService.fetchPurchaseHistory();
         setReceipts(records);
 
@@ -39,21 +48,26 @@ const PurchaseHistory = ({ navigation }) => {
           const allReviews = await pb.collection('review').getList(1, 50, {
             filter: `userID = "${user.id}"`,
           });
-          // Track reviewed purchases as "receiptID:productID"
           const reviewedIds = new Set(
             allReviews.items.map(review => `${review.receiptID}:${review.productID}`)
           );
           setReviewedPurchases(reviewedIds);
         }
       } catch (error) {
-        console.error('Error fetching purchase history or reviews:', error);
+        // Silent error handling; rely on Alert from service
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
-  }, []);
+  }, [refreshTrigger]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setRefreshTrigger(Date.now());
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   const handleReviewSubmit = async () => {
     if (!reviewText.trim() || !selectedProductId || !selectedReceiptId) return;
@@ -69,7 +83,6 @@ const PurchaseHistory = ({ navigation }) => {
       setSelectedProductId(null);
       setSelectedReceiptId(null);
     } catch (error) {
-      console.error('Error submitting review:', error);
       alert('Failed to submit review');
     }
   };
@@ -84,7 +97,6 @@ const PurchaseHistory = ({ navigation }) => {
 
     return (
       <View style={styles.receiptCard}>
-        {/* Products Section */}
         <View style={styles.productsContainer}>
           <Text style={styles.productsTitle}>Products</Text>
           {item.products.map((product) => (
@@ -101,8 +113,6 @@ const PurchaseHistory = ({ navigation }) => {
             </View>
           ))}
         </View>
-
-        {/* Receipt Details Section */}
         <View style={styles.receiptDetails}>
           <Text style={styles.receiptId}>Order #{item.id}</Text>
           <Text style={styles.receiptText}>Courier: {item.courier || 'Not specified'}</Text>
@@ -112,14 +122,12 @@ const PurchaseHistory = ({ navigation }) => {
             Date: {new Date(item.created).toLocaleDateString()}
           </Text>
         </View>
-
-        {/* Review Button */}
         <TouchableOpacity
           style={[styles.reviewButton, allReviewed && styles.reviewButtonDisabled]}
           onPress={() => {
             if (!allReviewed && unreviewedProduct) {
               setSelectedProductId(unreviewedProduct.id);
-              setSelectedReceiptId(item.id); // Set receipt ID
+              setSelectedReceiptId(item.id);
               setModalVisible(true);
             }
           }}
@@ -133,7 +141,7 @@ const PurchaseHistory = ({ navigation }) => {
     );
   };
 
-  if (!fontsLoaded || loading) {
+  if (!fontsLoaded) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#AD1457" />
@@ -143,7 +151,11 @@ const PurchaseHistory = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {receipts.length === 0 ? (
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#AD1457" />
+        </View>
+      ) : receipts.length === 0 ? (
         <Text style={styles.noHistoryText}>No purchase history found.</Text>
       ) : (
         <FlatList
@@ -153,8 +165,6 @@ const PurchaseHistory = ({ navigation }) => {
           contentContainerStyle={styles.listContent}
         />
       )}
-
-      {/* Review Modal */}
       <Modal
         animationType="slide"
         transparent={true}

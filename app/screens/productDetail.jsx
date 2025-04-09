@@ -90,23 +90,11 @@ const ProductDetail = ({ route, navigation }) => {
       );
       return;
     }
-    setModalVisible(true); // Triggers the modal for confirmation
-  };
-
-  const confirmAddToBag = async () => {
     try {
       console.log('Adding to cart:', { productId: product.id, quantity });
       const updatedCart = await addToCart(product, quantity);
       console.log('Cart updated:', updatedCart);
-      setModalVisible(false);
-      Alert.alert(
-        'Added to Bag',
-        `${quantity} ${product.name}(s) added to your bag!`,
-        [
-          { text: 'Continue Shopping', onPress: () => navigation.goBack() },
-          { text: 'View Bag', onPress: () => navigation.navigate('Cart') },
-        ]
-      );
+      setModalVisible(true); // Show the "Added to Bag" modal
     } catch (error) {
       console.error('Add to cart error:', error);
       Alert.alert('Error', `Failed to add to cart: ${error.message}`, [{ text: 'OK' }]);
@@ -230,7 +218,7 @@ const ProductDetail = ({ route, navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Modal for confirmAddToBag */}
+      {/* Modal for "Added to Bag" */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -239,22 +227,28 @@ const ProductDetail = ({ route, navigation }) => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Confirm Addition to Bag</Text>
+            <Text style={styles.modalTitle}>Added to Bag</Text>
             <Text style={styles.modalText}>
-              Are you sure you want to add {quantity} {product.name}(s) to your bag?
+              {quantity} {product.name}(s) added to your bag!
             </Text>
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
                 style={styles.modalButtonCancel}
-                onPress={() => setModalVisible(false)}
+                onPress={() => {
+                  setModalVisible(false);
+                  navigation.goBack();
+                }}
               >
-                <Text style={styles.modalButtonTextCancel}>Cancel</Text>
+                <Text style={styles.modalButtonTextCancel}>Continue Shopping</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.modalButtonConfirm}
-                onPress={confirmAddToBag}
+                onPress={() => {
+                  setModalVisible(false);
+                  navigation.navigate('Cart');
+                }}
               >
-                <Text style={styles.modalButtonTextConfirm}>Confirm</Text>
+                <Text style={styles.modalButtonTextConfirm}>View Bag</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -457,7 +451,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'MyFont-Regular',
   },
-  // Modal Styles for confirmAddToBag
+  // Modal Styles for "Added to Bag"
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',

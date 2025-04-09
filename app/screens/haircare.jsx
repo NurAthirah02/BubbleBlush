@@ -20,6 +20,8 @@ import { useFonts } from 'expo-font';
 import { Alert } from 'react-native';
 
 const { width } = Dimensions.get('window');
+const VIDEO_WIDTH = width - 40;
+const VIDEO_HEIGHT = VIDEO_WIDTH * (9 / 16); // 16:9 aspect ratio
 
 const Haircare = ({ navigation }) => {
   const [hotSaleProducts, setHotSaleProducts] = useState([]);
@@ -166,7 +168,6 @@ const Haircare = ({ navigation }) => {
             HAIRCARE
           </Animated.Text>
         </View>
-
         <View style={styles.videoFrameContainer}>
           <View style={styles.videoInnerContainer}>
             {videoError ? (
@@ -174,7 +175,7 @@ const Haircare = ({ navigation }) => {
             ) : (
               <Video
                 source={require('../assets/haircare/haircare.mp4')}
-                style={styles.video}
+                style={[styles.video, { width: VIDEO_WIDTH, height: VIDEO_HEIGHT }]}
                 resizeMode="cover"
                 shouldPlay
                 isLooping
@@ -482,10 +483,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     alignItems: 'center',
   },
-  video: {
-    width: width - 40,
-    height: 200,
-  },
+
   carouselContainer: {
     width: '100%',
     marginHorizontal: 20,

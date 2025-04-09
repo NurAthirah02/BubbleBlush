@@ -20,6 +20,8 @@ import { useFonts } from 'expo-font';
 import { Alert } from 'react-native';
 
 const { width } = Dimensions.get('window');
+const VIDEO_WIDTH = width - 40;
+const VIDEO_HEIGHT = VIDEO_WIDTH * (9 / 16); // 16:9 aspect ratio
 
 const Makeup = ({ navigation }) => {
   const [hotSaleProducts, setHotSaleProducts] = useState([]);
@@ -174,7 +176,7 @@ const Makeup = ({ navigation }) => {
             ) : (
               <Video
                 source={require('../assets/makeup/makeup.mp4')}
-                style={styles.video}
+                style={[styles.video, { width: VIDEO_WIDTH, height: VIDEO_HEIGHT }]}
                 resizeMode="cover"
                 shouldPlay
                 isLooping
@@ -481,10 +483,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
     alignItems: 'center',
-  },
-  video: {
-    width: width - 40,
-    height: 200,
   },
   carouselContainer: {
     width: '100%',

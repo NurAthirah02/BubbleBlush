@@ -20,6 +20,8 @@ import authService from '../lib/services/auth';
 import { useFonts } from 'expo-font';
 
 const { width } = Dimensions.get('window');
+const VIDEO_WIDTH = width - 40;
+const VIDEO_HEIGHT = VIDEO_WIDTH * (9 / 16); // 16:9 aspect ratio
 
 const Skincare = ({ navigation }) => {
   const [hotSaleProducts, setHotSaleProducts] = useState([]);
@@ -173,8 +175,8 @@ const Skincare = ({ navigation }) => {
               <Text style={styles.errorText}>{videoError}</Text>
             ) : (
               <Video
-                source={require('../assets/skincare/skincare.mp4')} 
-                style={styles.video}
+                source={require('../assets/skincare/skincare.mp4')}
+                style={[styles.video, { width: VIDEO_WIDTH, height: VIDEO_HEIGHT }]}
                 resizeMode="cover"
                 shouldPlay
                 isLooping
@@ -481,10 +483,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
     alignItems: 'center',
-  },
-  video: {
-    width: width - 40,
-    height: 200,
   },
   carouselContainer: {
     width: '100%',

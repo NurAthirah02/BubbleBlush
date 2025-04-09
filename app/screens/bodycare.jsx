@@ -19,7 +19,10 @@ import authService from '../lib/services/auth'; // Import auth service
 import { useFonts } from 'expo-font';
 import { Alert } from 'react-native';
 
+
 const { width } = Dimensions.get('window');
+const VIDEO_WIDTH = width - 40;
+const VIDEO_HEIGHT = VIDEO_WIDTH * (9 / 16); // 16:9 aspect ratio
 
 const Bodycare = ({ navigation }) => {
   const [hotSaleProducts, setHotSaleProducts] = useState([]);
@@ -174,7 +177,7 @@ const Bodycare = ({ navigation }) => {
             ) : (
               <Video
                 source={require('../assets/bodycare/bodycare.mp4')}
-                style={styles.video}
+                style={[styles.video, { width: VIDEO_WIDTH, height: VIDEO_HEIGHT }]}
                 resizeMode="cover"
                 shouldPlay
                 isLooping
@@ -482,10 +485,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     alignItems: 'center',
   },
-  video: {
-    width: width - 40,
-    height: 200,
-  },
+
   carouselContainer: {
     width: '100%',
     marginHorizontal: 20,

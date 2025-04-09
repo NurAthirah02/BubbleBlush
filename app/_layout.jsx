@@ -1,4 +1,4 @@
-//app/_layout.jsx
+// app/_layout.jsx
 import React, { useEffect, useState, useRef } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -6,6 +6,7 @@ import { StyleSheet, View, Text, TouchableOpacity, Image, Animated, Dimensions }
 import { Ionicons } from '@expo/vector-icons';
 import * as Font from 'expo-font';
 import authService from './lib/services/auth';
+import { CartProvider } from './lib/services/cartContext';
 import LoginScreen from './screens/login';
 import SignupScreen from './screens/signup';
 import FAQScreen from './screens/faq';
@@ -93,41 +94,50 @@ const AppLayout = () => {
 
   const checkAuth = async () => {
     const currentUser = await authService.getCurrentUser();
+    console.log('checkAuth called, currentUser:', currentUser);
     setUser(currentUser);
     return currentUser;
   };
 
   const triggerTutorial = () => {
+    console.log('triggerTutorial called');
     setShowTutorial(true);
     setCurrentStep(0);
   };
 
   useEffect(() => {
     async function initialize() {
+      let isFontLoaded = false;
+      let initialUser = null;
+
       try {
         await Font.loadAsync({
           'MyFont-Regular': require('./assets/font/PTSerif-Regular.ttf'),
         });
-        console.log('Font loaded');
-        setFontLoaded(true);
+        console.log('Font loaded successfully');
+        isFontLoaded = true;
 
-        const currentUser = await checkAuth();
-        console.log('Current user:', currentUser);
-        if (currentUser?.isFirstLogin) {
-          console.log('Showing tutorial due to isFirstLogin:', currentUser.isFirstLogin);
+        initialUser = await checkAuth();
+        console.log('Initial current user:', initialUser);
+        if (initialUser?.isFirstLogin) {
+          console.log('Showing tutorial due to isFirstLogin:', initialUser.isFirstLogin);
           setShowTutorial(true);
         }
       } catch (error) {
         console.error('Initialization error:', error);
       } finally {
+        setFontLoaded(isFontLoaded);
+        setUser(initialUser);
         setLoading(false);
+        console.log('Loading complete, fontLoaded:', isFontLoaded, 'user:', initialUser);
       }
     }
     initialize();
 
-    const unsubscribe = authService.onAuthChange((user) => {
-      setUser(user);
-      if (user?.isFirstLogin) {
+    const unsubscribe = authService.onAuthChange((newUser) => {
+      console.log('Auth state changed, new user:', newUser);
+      setUser(newUser);
+      if (newUser?.isFirstLogin) {
         setShowTutorial(true);
       } else {
         setShowTutorial(false);
@@ -138,7 +148,7 @@ const AppLayout = () => {
   }, []);
 
   useEffect(() => {
-    console.log('Show tutorial state:', showTutorial, 'Current step:', currentStep);
+    console.log('Tutorial state updated - showTutorial:', showTutorial, 'currentStep:', currentStep);
     if (showTutorial) {
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -157,17 +167,20 @@ const AppLayout = () => {
   const nextStep = () => {
     const manual = firstLoginManual();
     if (currentStep < manual.steps.length) {
+      console.log('Moving to next tutorial step:', currentStep + 1);
       setCurrentStep(currentStep + 1);
     }
   };
 
   const prevStep = () => {
     if (currentStep > 0) {
+      console.log('Moving to previous tutorial step:', currentStep - 1);
       setCurrentStep(currentStep - 1);
     }
   };
 
   const completeTutorial = async () => {
+    console.log('Completing tutorial');
     setShowTutorial(false);
     if (user?.isFirstLogin) {
       try {
@@ -185,137 +198,143 @@ const AppLayout = () => {
   };
 
   const skipTutorial = () => {
+    console.log('Skipping tutorial');
     setShowTutorial(false);
     completeTutorial();
   };
 
   if (!fontLoaded || loading) {
+    console.log('App still loading, fontLoaded:', fontLoaded, 'loading:', loading);
     return null;
   }
 
   const manual = firstLoginManual();
 
   return (
-    <View style={styles.rootContainer}>
-      <Stack.Navigator>
-        {user ? (
-          <>
-            <Stack.Screen
-              name="Tabs"
-              children={(props) => <TabNavigator {...props} checkAuth={checkAuth} triggerTutorial={triggerTutorial} />}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="FAQ"
-              component={FAQScreen}
-              options={{ headerShown: true, title: 'FAQ' }}
-            />
-          </>
-        ) : (
-          <>
-            <Stack.Screen
-              name="Login"
-              component={LoginScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Signup"
-              component={SignupScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Tabs"
-              component={TabNavigator}
-              options={{ headerShown: false }}
-            />
-          </>
-        )}
-      </Stack.Navigator>
+    <CartProvider>
+      <View style={styles.rootContainer}>
+        <Stack.Navigator>
+          {user ? (
+            <>
+              <Stack.Screen
+                name="Tabs"
+                children={(props) => (
+                  <TabNavigator {...props} checkAuth={checkAuth} triggerTutorial={triggerTutorial} />
+                )}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="FAQ"
+                component={FAQScreen}
+                options={{ headerShown: true, title: 'FAQ' }}
+              />
+            </>
+          ) : (
+            <>
+              <Stack.Screen
+                name="Login"
+                component={LoginScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="Signup"
+                component={SignupScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="Tabs"
+                component={TabNavigator}
+                options={{ headerShown: false }}
+              />
+            </>
+          )}
+        </Stack.Navigator>
 
-      {showTutorial && (
-        <View style={styles.overlay}>
-          <View style={styles.darkOverlay} />
-          <Animated.View style={[styles.tutorialContainer, { opacity: fadeAnim }]}>
-            {currentStep === 0 ? (
-              <>
-                <Text style={styles.tutorialTitle}>{manual.title}</Text>
-                <Text style={styles.tutorialText}>{manual.intro}</Text>
-                <View style={styles.progressBar}>
-                  {Array(manual.steps.length + 1)
-                    .fill(0)
-                    .map((_, i) => (
-                      <View
-                        key={i}
-                        style={[
-                          styles.progressDot,
-                          {
-                            backgroundColor:
-                              i <= currentStep ? '#AD1457' : '#ccc',
-                          },
-                        ]}
-                      />
-                    ))}
-                </View>
-              </>
-            ) : (
-              <>
-                <Image
-                  source={manual.steps[currentStep - 1].image}
-                  style={styles.tutorialImage}
-                />
-                <View style={styles.progressBar}>
-                  {Array(manual.steps.length + 1)
-                    .fill(0)
-                    .map((_, i) => (
-                      <View
-                        key={i}
-                        style={[
-                          styles.progressDot,
-                          {
-                            backgroundColor:
-                              i <= currentStep ? '#AD1457' : '#ccc',
-                          },
-                        ]}
-                      />
-                    ))}
-                </View>
-                <Text style={styles.tutorialTitle}>
-                  {manual.steps[currentStep - 1].title}
-                </Text>
-                <Text style={styles.tutorialText}>
-                  {manual.steps[currentStep - 1].description}
-                </Text>
-              </>
-            )}
-            <View style={styles.tutorialButtonRow}>
-              {currentStep > 0 && (
+        {showTutorial && (
+          <View style={styles.overlay}>
+            <View style={styles.darkOverlay} />
+            <Animated.View style={[styles.tutorialContainer, { opacity: fadeAnim }]}>
+              {currentStep === 0 ? (
+                <>
+                  <Text style={styles.tutorialTitle}>{manual.title}</Text>
+                  <Text style={styles.tutorialText}>{manual.intro}</Text>
+                  <View style={styles.progressBar}>
+                    {Array(manual.steps.length + 1)
+                      .fill(0)
+                      .map((_, i) => (
+                        <View
+                          key={i}
+                          style={[
+                            styles.progressDot,
+                            {
+                              backgroundColor:
+                                i <= currentStep ? '#AD1457' : '#ccc',
+                            },
+                          ]}
+                        />
+                      ))}
+                  </View>
+                </>
+              ) : (
+                <>
+                  <Image
+                    source={manual.steps[currentStep - 1].image}
+                    style={styles.tutorialImage}
+                  />
+                  <View style={styles.progressBar}>
+                    {Array(manual.steps.length + 1)
+                      .fill(0)
+                      .map((_, i) => (
+                        <View
+                          key={i}
+                          style={[
+                            styles.progressDot,
+                            {
+                              backgroundColor:
+                                i <= currentStep ? '#AD1457' : '#ccc',
+                            },
+                          ]}
+                        />
+                      ))}
+                  </View>
+                  <Text style={styles.tutorialTitle}>
+                    {manual.steps[currentStep - 1].title}
+                  </Text>
+                  <Text style={styles.tutorialText}>
+                    {manual.steps[currentStep - 1].description}
+                  </Text>
+                </>
+              )}
+              <View style={styles.tutorialButtonRow}>
+                {currentStep > 0 && (
+                  <TouchableOpacity
+                    style={styles.tutorialButton}
+                    onPress={prevStep}
+                  >
+                    <Text style={styles.tutorialButtonText}>Back</Text>
+                  </TouchableOpacity>
+                )}
                 <TouchableOpacity
                   style={styles.tutorialButton}
-                  onPress={prevStep}
+                  onPress={
+                    currentStep === manual.steps.length
+                      ? completeTutorial
+                      : nextStep
+                  }
                 >
-                  <Text style={styles.tutorialButtonText}>Back</Text>
+                  <Text style={styles.tutorialButtonText}>
+                    {currentStep === manual.steps.length ? 'Finish' : 'Next'}
+                  </Text>
                 </TouchableOpacity>
-              )}
-              <TouchableOpacity
-                style={styles.tutorialButton}
-                onPress={
-                  currentStep === manual.steps.length
-                    ? completeTutorial
-                    : nextStep
-                }
-              >
-                <Text style={styles.tutorialButtonText}>
-                  {currentStep === manual.steps.length ? 'Finish' : 'Next'}
-                </Text>
+              </View>
+              <TouchableOpacity style={styles.skipButton} onPress={skipTutorial}>
+                <Text style={styles.skipButtonText}>Skip Tutorial</Text>
               </TouchableOpacity>
-            </View>
-            <TouchableOpacity style={styles.skipButton} onPress={skipTutorial}>
-              <Text style={styles.skipButtonText}>Skip Tutorial</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        </View>
-      )}
-    </View>
+            </Animated.View>
+          </View>
+        )}
+      </View>
+    </CartProvider>
   );
 };
 

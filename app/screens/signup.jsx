@@ -1,5 +1,6 @@
+//app/screens/signup.jsx
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Dimensions, Modal } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Dimensions, Modal, KeyboardAvoidingView, Platform } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useFonts } from 'expo-font';
 import authService from '../lib/services/auth';
@@ -12,7 +13,7 @@ const SignupScreen = ({ navigation }) => {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [warning, setWarning] = useState('');
-  const [modalVisible, setModalVisible] = useState(false); // State for modal visibility
+  const [modalVisible, setModalVisible] = useState(false);
 
   const [fontsLoaded] = useFonts({
     'MyFont-Regular': require('../assets/font/PTSerif-Regular.ttf'),
@@ -22,14 +23,14 @@ const SignupScreen = ({ navigation }) => {
     try {
       setError('');
       setWarning('');
-      setModalVisible(false); // Reset modal
+      setModalVisible(false);
       const result = await authService.signup(email, password, name);
       if (result.success) {
         if (result.warning) {
           setWarning(result.warning);
-          navigation.navigate('Login'); // Navigate to Login screen on warning
+          navigation.navigate('Login');
         } else {
-          setModalVisible(true); // Show modal on success (if auto-login were kept)
+          setModalVisible(true);
         }
       } else {
         setError(result.error || 'Signup failed');
@@ -41,8 +42,8 @@ const SignupScreen = ({ navigation }) => {
   };
 
   const handleModalOk = () => {
-    setModalVisible(false); // Close modal
-    navigation.navigate('Login'); // Navigate to Login
+    setModalVisible(false);
+    navigation.navigate('Login');
   };
 
   if (!fontsLoaded) {
@@ -50,93 +51,103 @@ const SignupScreen = ({ navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
-      {/* Modal */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)} // For Android back button
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Success</Text>
-            <Text style={styles.modalMessage}>Successful sign up</Text>
-            <TouchableOpacity style={styles.modalButton} onPress={handleModalOk}>
-              <Text style={styles.modalButtonText}>OK</Text>
-            </TouchableOpacity>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    >
+      <View style={styles.innerContainer}>
+        {/* Modal */}
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>Success</Text>
+              <Text style={styles.modalMessage}>Successful sign up</Text>
+              <TouchableOpacity style={styles.modalButton} onPress={handleModalOk}>
+                <Text style={styles.modalButtonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
 
-      {/* Header */}
-      <View style={[styles.header, error || warning ? styles.headerWithError : null]}>
-        <Image
-          source={require('../assets/login.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
+        {/* Header */}
+        <View style={[styles.header, error || warning ? styles.headerWithError : null]}>
+          <Image
+            source={require('../assets/login.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </View>
+
+        <View style={styles.pinkContainer} />
+
+        {/* Form */}
+        <View style={styles.formContainer}>
+          <View style={styles.inputContainer}>
+            <Ionicons name="person-outline" size={20} color="#AD1457" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Name"
+              value={name}
+              onChangeText={setName}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Ionicons name="mail-outline" size={20} color="#AD1457" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Ionicons name="lock-closed-outline" size={20} color="#AD1457" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+          </View>
+
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          {warning ? <Text style={styles.warningText}>{warning}</Text> : null}
+
+          <TouchableOpacity style={styles.button} onPress={handleSignup}>
+            <Text style={styles.buttonText}>Sign Up</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.loginText}>
+              Have we met before? <Text style={styles.loginLink}>Log in</Text>
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
-
-      <View style={styles.pinkContainer} />
-
-      {/* Form */}
-      <View style={styles.formContainer}>
-        <View style={styles.inputContainer}>
-          <Ionicons name="person-outline" size={20} color="#AD1457" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Name"
-            value={name}
-            onChangeText={setName}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Ionicons name="mail-outline" size={20} color="#AD1457" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Ionicons name="lock-closed-outline" size={20} color="#AD1457" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-        </View>
-
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
-        {warning ? <Text style={styles.warningText}>{warning}</Text> : null}
-
-        <TouchableOpacity style={styles.button} onPress={handleSignup}>
-          <Text style={styles.buttonText}>Sign Up</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.loginText}>
-          Have we met before? <Text style={styles.loginLink}>Log in</Text>
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     backgroundColor: '#f8d7d6',
+  },
+  innerContainer: {
+    flex: 1,
+    alignItems: 'center',
+    width: '100%',
   },
   header: {
     position: 'absolute',
@@ -232,12 +243,11 @@ const styles = StyleSheet.create({
     color: '#AD1457',
     fontFamily: 'MyFont-Regular',
   },
-  // Modal Styles
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent overlay
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
     width: width * 0.8,
@@ -275,7 +285,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#F06292', // Lighter pink for border
+    borderColor: '#F06292',
   },
   modalButtonText: {
     color: '#fff',

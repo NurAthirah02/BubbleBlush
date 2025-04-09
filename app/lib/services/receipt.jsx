@@ -9,27 +9,36 @@ export const placeOrder = async (selectedItems, totalAmount, courier, paymentOpt
 
     // Step 1: Create the receipt
     const receiptData = {
-      userID: currentUser.id, // Assuming relation field, use ID
+      userID: currentUser.id,
       totalAmount: totalAmount,
-      courier: courier, // e.g., "ninjavan"
-      paymentOption: paymentOption, // e.g., "Debit Card" (full label passed from Checkout)
+      courier: courier,
+      paymentOption: paymentOption,
     };
     const receipt = await pb.collection('receipt').create(receiptData);
     console.log('Receipt created:', receipt);
 
     // Step 2: Process cart items and update product quantities
     const receiptCartPromises = selectedItems.map(async (item) => {
+      // Log the item structure
+      console.log('Processing item:', {
+        cartItemId: item.cartItemId,
+        productId: item.product.id,
+        quantity: item.quantity,
+      });
+
       // Create receiptCart entry
       const receiptCartData = {
         cartID: item.cartItemId,
         receiptID: receipt.id,
       };
-      await pb.collection('receiptCart').create(receiptCartData);
+      const receiptCart = await pb.collection('receiptCart').create(receiptCartData);
+      console.log('ReceiptCart created:', receiptCart);
 
       // Update cart status
-      await pb.collection('cart').update(item.cartItemId, {
+      const updatedCart = await pb.collection('cart').update(item.cartItemId, {
         statusPayment: true,
       });
+      console.log('Cart updated:', updatedCart);
 
       // Fetch the product to get current quantity
       const product = await pb.collection('products').getOne(item.product.id);
@@ -42,13 +51,12 @@ export const placeOrder = async (selectedItems, totalAmount, courier, paymentOpt
       }
 
       // Update product quantity
-      await pb.collection('products').update(item.product.id, {
+      const updatedProduct = await pb.collection('products').update(item.product.id, {
         quantity: newQuantity,
       });
       console.log(`Updated ${product.name} quantity to:`, newQuantity);
     });
 
-    // Wait for all cart and product updates to complete
     await Promise.all(receiptCartPromises);
     console.log('Cart items linked, updated, and product quantities reduced');
 

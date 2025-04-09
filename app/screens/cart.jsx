@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+// app/screens/cart.js
+import React, { useContext, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,39 +7,30 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
-  ScrollView,
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { getCart, updateCartItemQuantity, removeFromCart } from '../lib/services/cart';
-import authService from '../lib/services/auth';
+import { updateCartItemQuantity, removeFromCart } from '../lib/services/cart';
+import { CartContext } from '../lib/services/cartContext';
 import { useFonts } from 'expo-font';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 
 const Cart = ({ navigation }) => {
-  const [cartItems, setCartItems] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { cartItems, setCartItems, refreshCart, isLoggedIn } = useContext(CartContext);
 
   const [fontsLoaded] = useFonts({
     'MyFont-Regular': require('../assets/font/PTSerif-Regular.ttf'),
   });
 
-  const refreshCart = async () => {
-    const items = await getCart();
-    setCartItems(items.map(item => ({ ...item, selected: false })));
-  };
-
+  // Refresh cart when screen is focused
   useEffect(() => {
-    const checkAuthAndLoadCart = async () => {
-      const user = await authService.getCurrentUser();
-      setIsLoggedIn(!!user);
-      if (user) {
-        await refreshCart();
-      } else {
-        setCartItems([]);
-      }
-    };
-    checkAuthAndLoadCart();
-  }, []);
+    const unsubscribe = navigation.addListener('focus', () => {
+      console.log('Cart screen focused, refreshing cart...');
+      refreshCart();
+    });
+
+    return unsubscribe; // Cleanup listener on unmount
+  }, [navigation, refreshCart]);
 
   const toggleItemSelection = (itemId) => {
     setCartItems(prevItems =>
@@ -50,7 +42,8 @@ const Cart = ({ navigation }) => {
 
   const increaseQuantity = async (cartItemId) => {
     try {
-      await updateCartItemQuantity(cartItemId, cartItems.find(i => i.cartItemId === cartItemId).quantity + 1);
+      const item = cartItems.find(i => i.cartItemId === cartItemId);
+      await updateCartItemQuantity(cartItemId, item.quantity + 1);
       await refreshCart();
     } catch (error) {
       Alert.alert("Error", error.message);
@@ -82,39 +75,50 @@ const Cart = ({ navigation }) => {
     .filter(item => item.selected)
     .reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
+  const renderRightActions = (cartItemId) => (
+    <TouchableOpacity
+      style={styles.deleteButton}
+      onPress={() => handleRemoveItem(cartItemId)}
+    >
+      <Ionicons name="trash-outline" size={24} color="#fff" />
+    </TouchableOpacity>
+  );
+
   const renderItem = ({ item }) => (
-    <View style={styles.itemContainer}>
-      <TouchableOpacity style={styles.checkboxContainer} onPress={() => toggleItemSelection(item.product.id)}>
-        <Ionicons name={item.selected ? 'checkbox' : 'square-outline'} size={24} color={item.selected ? '#AD1457' : '#666'} />
-      </TouchableOpacity>
-      <View style={styles.imageContainer}>
-        <Image source={{ uri: item.product.imageUrl }} style={styles.itemImage} />
-      </View>
-      <View style={styles.detailsContainer}>
-        <View style={styles.detailsLeft}>
-          <Text style={styles.itemName}>{item.product.name}</Text>
-          <View style={styles.quantityPriceRow}>
-            <View style={styles.quantityContainer}>
-              <TouchableOpacity style={styles.quantityButton} onPress={() => decreaseQuantity(item.cartItemId)}>
-                <Text style={styles.quantityButtonText}>−</Text>
-              </TouchableOpacity>
-              <Text style={styles.quantityText}>{item.quantity}</Text>
-              <TouchableOpacity style={styles.quantityButton} onPress={() => increaseQuantity(item.cartItemId)}>
-                <Text style={styles.quantityButtonText}>+</Text>
-              </TouchableOpacity>
+    <Swipeable
+      renderRightActions={() => renderRightActions(item.cartItemId)}
+      overshootRight={false}
+    >
+      <View style={styles.itemContainer}>
+        <TouchableOpacity style={styles.checkboxContainer} onPress={() => toggleItemSelection(item.product.id)}>
+          <Ionicons name={item.selected ? 'checkbox' : 'square-outline'} size={24} color={item.selected ? '#AD1457' : '#666'} />
+        </TouchableOpacity>
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: item.product.imageUrl }} style={styles.itemImage} />
+        </View>
+        <View style={styles.detailsContainer}>
+          <View style={styles.detailsLeft}>
+            <Text style={styles.itemName}>{item.product.name}</Text>
+            <View style={styles.quantityPriceRow}>
+              <View style={styles.quantityContainer}>
+                <TouchableOpacity style={styles.quantityButton} onPress={() => decreaseQuantity(item.cartItemId)}>
+                  <Text style={styles.quantityButtonText}>−</Text>
+                </TouchableOpacity>
+                <Text style={styles.quantityText}>{item.quantity}</Text>
+                <TouchableOpacity style={styles.quantityButton} onPress={() => increaseQuantity(item.cartItemId)}>
+                  <Text style={styles.quantityButtonText}>+</Text>
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.priceText}>RM {(item.product.price * item.quantity).toFixed(2)}</Text>
             </View>
-            <Text style={styles.priceText}>RM {(item.product.price * item.quantity).toFixed(2)}</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveItem(item.cartItemId)}>
-          <Ionicons name="trash-outline" size={20} color="#AD1457" />
-        </TouchableOpacity>
       </View>
-    </View>
+    </Swipeable>
   );
 
   const renderEmptyCart = () => (
-    <ScrollView contentContainerStyle={styles.scrollContent}>
+    <View style={styles.emptyCartWrapper}>
       <View style={styles.emptyCartContainer}>
         <Ionicons name="cart-outline" size={100} color="#666" />
         <Text style={styles.emptyCartText}>
@@ -132,16 +136,18 @@ const Cart = ({ navigation }) => {
           </Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+    </View>
   );
 
   if (!fontsLoaded) return null;
 
   return (
     <View style={styles.container}>
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>CART</Text>
-      </View>
+      {cartItems.length > 0 && (
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>CART</Text>
+        </View>
+      )}
       {cartItems.length === 0 ? (
         renderEmptyCart()
       ) : (
@@ -149,7 +155,7 @@ const Cart = ({ navigation }) => {
           <FlatList
             data={cartItems}
             renderItem={renderItem}
-            keyExtractor={(item) => item.cartItemId} // Use cartItemId as key
+            keyExtractor={(item) => item.cartItemId}
             contentContainerStyle={styles.listContainer}
           />
           <View style={styles.bottomContainer}>
@@ -188,13 +194,13 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     fontFamily: 'MyFont-Regular',
   },
-  scrollContent: {
-    flexGrow: 1,
+  emptyCartWrapper: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingBottom: 100, // Offset for bottom tab bar
   },
   emptyCartContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -228,7 +234,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     paddingHorizontal: 20,
-    paddingBottom: 220, // Adjusted to clear the bottomContainer’s content
+    paddingBottom: 220,
   },
   itemContainer: {
     flexDirection: 'row',
@@ -313,21 +319,27 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: 'MyFont-Regular',
   },
-  removeButton: {
-    paddingLeft: 40,
+  deleteButton: {
+    backgroundColor: '#AD1457',
     justifyContent: 'center',
     alignItems: 'center',
+    width: 80,
+    height: 'auto',
+    borderRadius: 10,
+    marginBottom: 15,
+    paddingVertical: 15,
+    marginLeft: 5,
   },
   bottomContainer: {
     position: 'absolute',
-    bottom: 0, // Background extends behind the tab bar
+    bottom: 0,
     left: 0,
     right: 0,
     backgroundColor: '#ffffff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 15,
-    paddingBottom: 115, // Lifts content above tab bar (~100 units) plus padding
+    paddingBottom: 115,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
