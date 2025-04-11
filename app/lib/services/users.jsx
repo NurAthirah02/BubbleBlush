@@ -20,7 +20,7 @@ const userService = {
         name: user.name,
         email: user.email,
         avatarUrl: avatarUrl || null,
-        phoneNo: user.phoneNo || '', // Changed from phoneNumber to phoneNo
+        phoneNo: user.phoneNo || '', 
         address: user.address || ''
       };
     } catch (error) {
@@ -29,14 +29,14 @@ const userService = {
     }
   },
 
-  async updateProfile({ name, phoneNo, address }) { // Changed parameter name to phoneNo
+  async updateProfile({ name, phoneNo, address }) { 
     try {
       const currentUser = await authService.getCurrentUser();
       if (!currentUser) throw new Error('No authenticated user found');
 
       const updatedData = {
         name,
-        phoneNo, // Changed from phoneNumber to phoneNo
+        phoneNo, 
         address
       };
 

@@ -16,7 +16,7 @@ const purchaseHistoryService = {
         if (attempt === retries) {
           return [];
         }
-        await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
+        await new Promise(resolve => setTimeout(resolve, 500)); 
       }
     }
     return [];
@@ -99,7 +99,7 @@ const purchaseHistoryService = {
           );
           return [];
         }
-        await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
+        await new Promise(resolve => setTimeout(resolve, 500)); 
       }
     }
   },

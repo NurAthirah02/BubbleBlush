@@ -94,7 +94,7 @@ const ProductDetail = ({ route, navigation }) => {
       console.log('Adding to cart:', { productId: product.id, quantity });
       const updatedCart = await addToCart(product, quantity);
       console.log('Cart updated:', updatedCart);
-      setModalVisible(true); // Show the "Added to Bag" modal
+      setModalVisible(true); 
     } catch (error) {
       console.error('Add to cart error:', error);
       Alert.alert('Error', `Failed to add to cart: ${error.message}`, [{ text: 'OK' }]);
@@ -451,7 +451,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'MyFont-Regular',
   },
-  // Modal Styles for "Added to Bag"
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',

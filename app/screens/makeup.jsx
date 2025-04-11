@@ -21,7 +21,7 @@ import { Alert } from 'react-native';
 
 const { width } = Dimensions.get('window');
 const VIDEO_WIDTH = width - 40;
-const VIDEO_HEIGHT = VIDEO_WIDTH * (9 / 16); // 16:9 aspect ratio
+const VIDEO_HEIGHT = VIDEO_WIDTH * (9 / 16); 
 
 const Makeup = ({ navigation }) => {
   const [hotSaleProducts, setHotSaleProducts] = useState([]);

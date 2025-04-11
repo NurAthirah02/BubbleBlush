@@ -45,7 +45,7 @@ const Fragrance = ({ navigation }) => {
   ];
 
   const VIDEO_WIDTH = SCREEN_WIDTH - 40;
-  const VIDEO_HEIGHT = VIDEO_WIDTH * (9 / 16); // 16:9 aspect ratio
+  const VIDEO_HEIGHT = VIDEO_WIDTH * (9 / 16); 
 
   const fetchHotSaleFragranceProducts = async () => {
     setIsHotSaleLoading(true);
@@ -481,9 +481,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
     alignItems: 'center',
-  },
-  video: {
-    // Base styles (width and height set dynamically inline)
   },
   carouselContainer: {
     width: '100%',

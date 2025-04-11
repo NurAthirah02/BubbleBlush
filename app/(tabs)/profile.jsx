@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontFamily: 'MyFont-Regular',
   },
-  loadingText: { // Added for loading state
+  loadingText: { 
     fontSize: 18,
     color: '#2D2D2D',
     fontFamily: 'MyFont-Regular',

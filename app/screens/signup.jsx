@@ -93,6 +93,7 @@ const SignupScreen = ({ navigation }) => {
             <TextInput
               style={styles.input}
               placeholder="Name"
+              placeholderTextColor="#000000"
               value={name}
               onChangeText={setName}
             />
@@ -103,6 +104,7 @@ const SignupScreen = ({ navigation }) => {
             <TextInput
               style={styles.input}
               placeholder="Email"
+              placeholderTextColor="#000000"
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -114,7 +116,8 @@ const SignupScreen = ({ navigation }) => {
             <Ionicons name="lock-closed-outline" size={20} color="#AD1457" style={styles.icon} />
             <TextInput
               style={styles.input}
-              placeholder="Password"
+              placeholder="Password"  
+              placeholderTextColor="#000000"
               value={password}
               onChangeText={setPassword}
               secureTextEntry

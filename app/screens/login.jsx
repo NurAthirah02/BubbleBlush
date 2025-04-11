@@ -56,6 +56,7 @@ const LoginScreen = ({ navigation }) => {
             <TextInput 
               style={styles.input}
               placeholder="Email"
+              placeholderTextColor="#000000"
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -68,6 +69,7 @@ const LoginScreen = ({ navigation }) => {
             <TextInput 
               style={styles.input}
               placeholder="Password"
+              placeholderTextColor="#000000"
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -189,6 +191,7 @@ const styles = StyleSheet.create({
     color: '#AD1457',
     fontFamily: 'MyFont-Regular',
   },
+  
 });
 
 export default LoginScreen;

@@ -20,7 +20,7 @@ import { fetchProductByType } from '../lib/services/productService';
 import { searchProducts } from '../lib/services/search';
 import { Ionicons } from '@expo/vector-icons';
 import authService from '../lib/services/auth';
-import { CartContext } from '../lib/services/cartContext'; // Import CartContext
+import { CartContext } from '../lib/services/cartContext'; 
 
 const { width } = Dimensions.get('window');
 const circleSize = Math.max(Math.min(width * 0.3, 200), 120);
@@ -35,7 +35,7 @@ const bannerImages = [
 ];
 
 const HomeScreen = ({ navigation }) => {
-  const { cartItems } = useContext(CartContext); // Access cartItems from CartContext
+  const { cartItems } = useContext(CartContext); 
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [fontLoaded, setFontLoaded] = useState(false);

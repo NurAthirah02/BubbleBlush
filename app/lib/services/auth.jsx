@@ -42,7 +42,7 @@ const authService = {
   
       const newUser = await pb.collection('users').create(userData);
   
-      // Return success without attempting auto-login
+      
       return {
         success: true,
         user: { id: newUser.id, name: newUser.name, email: newUser.email },

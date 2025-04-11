@@ -16,7 +16,7 @@ export const searchProducts = async (query) => {
       id: item.id,
       name: item.name,
       price: item.price,
-      imageUrl: pb.files.getURL(item, item.image), // Construct the full image URL
+      imageUrl: pb.files.getURL(item, item.image), 
       description: item.description,
       category: item.category,
       productType: item.productType,

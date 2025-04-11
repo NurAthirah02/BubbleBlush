@@ -54,7 +54,6 @@ const PurchaseHistory = ({ navigation }) => {
           setReviewedPurchases(reviewedIds);
         }
       } catch (error) {
-        // Silent error handling; rely on Alert from service
       } finally {
         setLoading(false);
       }

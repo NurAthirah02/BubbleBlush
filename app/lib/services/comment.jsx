@@ -25,7 +25,7 @@ export const insertComment = async (userId, productId, receiptId, comment) => {
     const reviewData = {
       userID: userId,
       productID: productId,
-      receiptID: receiptId, // Add receiptID
+      receiptID: receiptId, 
       comment: comment,
     };
     const newReview = await pb.collection('review').create(reviewData);

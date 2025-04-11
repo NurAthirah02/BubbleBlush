@@ -45,7 +45,7 @@ export const addToCart = async (product, quantity) => {
       });
       const newRecord = await pb.collection('cart').create({
         productID: product.id,
-        userID: currentUser.id, // Use ID instead of email
+        userID: currentUser.id, 
         quantity: quantity,
         statusPayment: false
       });

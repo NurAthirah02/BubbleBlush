@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 20,
-    paddingBottom: 100, // Ensure content stays above the bottom tab bar
+    paddingBottom: 100, 
   },
   itemContainer: {
     flexDirection: 'row',
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: 100, // Ensure empty text stays above the tab bar
+    paddingBottom: 100,
   },
   emptyText: {
     fontSize: 18,

@@ -26,7 +26,7 @@ const Checkout = ({ route, navigation }) => {
   const { selectedItems } = route.params || { selectedItems: [] };
   const [userData, setUserData] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false); // State for custom modal
+  const [modalVisible, setModalVisible] = useState(false); 
 
   const paymentOptions = [
     { label: 'Credit Card', value: 'credit', icon: 'credit-card' },
@@ -554,12 +554,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontFamily: "MyFont-Regular",
   },
-  // Modal Styles
   modalOverlay: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent overlay
+    backgroundColor: "rgba(0, 0, 0, 0.5)", 
   },
   modalContainer: {
     width: "80%",

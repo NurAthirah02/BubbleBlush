@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Platform, TouchableOpacity, StyleSheet, View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { CartContext } from '../lib/services/cartContext'; // Import CartContext
+import { CartContext } from '../lib/services/cartContext'; 
 import ProfileScreen from '../(tabs)/profile';
 import PurchaseHistory from '../screens/purchaseHistory';
 import Wishlist from '../screens/wishlist';
@@ -41,7 +41,7 @@ const ProfileStack = ({ checkAuth }) => {
           <TouchableOpacity
             style={styles.headerRight}
             onPress={() => navigation.navigate('Home', { screen: 'Cart' })}
-            accessibilityLabel={`Cart with ${totalItems} items`} // Added for accessibility
+            accessibilityLabel={`Cart with ${totalItems} items`} 
           >
             <View style={styles.cartContainer}>
               <Ionicons name="cart-outline" size={28} color="#333" />
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -8,
     right: -8,
-    backgroundColor: '#AD1457', // Matches HomeStack.js
+    backgroundColor: '#AD1457', 
     borderRadius: 10,
     minWidth: 20,
     height: 20,

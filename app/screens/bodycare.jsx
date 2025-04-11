@@ -14,15 +14,15 @@ import Carousel from 'react-native-reanimated-carousel';
 import { Ionicons } from '@expo/vector-icons';
 import { Video } from 'expo-av';
 import { fetchProductByTypeCategory, fetchProductByCategory } from '../lib/services/productService';
-import wishlistService from '../lib/services/wishlist'; // Import wishlist service
-import authService from '../lib/services/auth'; // Import auth service
+import wishlistService from '../lib/services/wishlist'; 
+import authService from '../lib/services/auth'; 
 import { useFonts } from 'expo-font';
 import { Alert } from 'react-native';
 
 
 const { width } = Dimensions.get('window');
 const VIDEO_WIDTH = width - 40;
-const VIDEO_HEIGHT = VIDEO_WIDTH * (9 / 16); // 16:9 aspect ratio
+const VIDEO_HEIGHT = VIDEO_WIDTH * (9 / 16); 
 
 const Bodycare = ({ navigation }) => {
   const [hotSaleProducts, setHotSaleProducts] = useState([]);
@@ -32,7 +32,7 @@ const Bodycare = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [videoError, setVideoError] = useState(null);
-  const [wishlistStatus, setWishlistStatus] = useState({}); // Track wishlist status for each product
+  const [wishlistStatus, setWishlistStatus] = useState({}); 
 
   // Animation setup
   const fadeAnim = useRef(new Animated.Value(0)).current;

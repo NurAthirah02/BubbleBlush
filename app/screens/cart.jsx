@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: 100, // Offset for bottom tab bar
+    paddingBottom: 100, 
   },
   emptyCartContainer: {
     justifyContent: 'center',

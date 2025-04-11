@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import * as Font from 'expo-font'; // Import expo-font
+import * as Font from 'expo-font'; 
 
 const SettingsScreen = ({ showTutorial }) => {
   const navigation = useNavigation();
@@ -13,7 +13,7 @@ const SettingsScreen = ({ showTutorial }) => {
     async function loadFont() {
       try {
         await Font.loadAsync({
-          'MyFont-Regular': require('../assets/font/PTSerif-Regular.ttf'), // Import font
+          'MyFont-Regular': require('../assets/font/PTSerif-Regular.ttf'), 
         });
         setFontLoaded(true);
       } catch (error) {
@@ -39,7 +39,7 @@ const SettingsScreen = ({ showTutorial }) => {
     </TouchableOpacity>
   );
 
-  // Return null until font is loaded
+  
   if (!fontLoaded) {
     return null;
   }
